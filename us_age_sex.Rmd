@@ -1,0 +1,36 @@
+---
+title: "US Total COVID -19 Deaths by Age and"
+author: "David Jackson"
+date: "8/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(scales)
+```
+
+## R Markdown
+```{r}
+us <- read.csv("./USa.csv")
+us <- us[c(4:7)]
+colnames(us) <- c("State","Sex","Age","Deaths")
+us <- subset(us,Deaths >10)
+
+summary(us$Deaths)
+```
+
+## First Plot Sex ~ Deaths
+
+```{r}
+ggplot(us) + geom_col(aes(x=Age,y=Deaths)) + coord_flip()
+```
+
+```{r}
+ggplot(us) + geom_col(aes(x=Age,y=Deaths/sum(Deaths,na.rm=TRUE))) +
+  theme(axis.text.x = element_text(angle = 45)) + 
+  scale_y_continuous(labels=percent) +
+  labs(title="Deaths by Age Group as Percentage",x="Age Group",y="% of Age") + coord_flip()
+```
+
