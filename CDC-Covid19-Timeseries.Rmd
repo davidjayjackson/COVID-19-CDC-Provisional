@@ -1,0 +1,62 @@
+---
+title: "CDC Covid-19 US Time Series"
+author: "David Jackson"
+date: "1/18/2021"
+output: 
+  html_document: 
+    fig_width: 9
+    fig_height: 7
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(scales)
+library(dplyr)
+theme_set(theme_light())
+```
+
+## CDC US COVID-19 Data Over Time
+
+```{r}
+df <- read.csv("./US-CDC-COVID19-Timeseries.csv")
+df$Date <- as.Date(df$submission_date,format = "%m-%d-%Y")
+db <- df %>% select(-submission_date,-created_at,-conf_death,-prob_death,
+                    -conf_cases,-prob_cases)
+summary(db)
+```
+
+### Use Across Function to calculate Totals
+
+```{r}
+COVID <- db %>% group_by(Date) %>% summarise(
+  across (tot_cases:pnew_death,sum)
+)
+```
+
+## Probable vs New Cases
+
+```{r}
+ggplot(COVID) + geom_line(aes(x=Date,y=new_case,col="Daily Cases")) +
+  geom_line(aes(x=Date,y=pnew_case,col="Probable Cases")) +
+  scale_y_continuous(labels = comma) +
+  labs(title="Probable vs New Cases") 
+
+ggplot(COVID) + geom_line(aes(x=Date,y=pnew_case)) +
+  labs(title="Probable New Cases") +
+  scale_y_continuous(labels = comma)
+```
+
+## Probable vs New Deaths
+
+```{r}
+
+ggplot(COVID) + geom_line(aes(x=Date,y=new_death,col="Daily Death")) +
+  geom_line(aes(x=Date,y=pnew_death,col="Probable Deaths")) +
+  scale_y_continuous(labels = comma) +
+  labs(title="Probable vs Daily Deaths") +ylim(0,8000) 
+
+ggplot(COVID) + geom_line(aes(x=Date,y=pnew_death)) +
+  labs(title="Probable New Deaths") +
+  scale_y_continuous(labels = comma)
+```
